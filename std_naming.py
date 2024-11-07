@@ -2,7 +2,7 @@ import pathlib
 import re
 import shutil
 
-from functions import get_dir_ready
+from functions_lib import get_dir_ready
 
 import logging
 from datetime import datetime

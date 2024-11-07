@@ -1,7 +1,7 @@
 import pathlib
 from PIL import Image
 
-from functions import get_dir_ready
+from functions_lib import get_dir_ready
  
 from icecream import ic
 

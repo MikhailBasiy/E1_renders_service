@@ -4,7 +4,7 @@ import pathlib
 import pandas as pd
 import re
 
-from functions import get_dir_ready
+from functions_lib import get_dir_ready
 
 from icecream import ic        
 
