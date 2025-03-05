@@ -16,7 +16,7 @@ def get_cropped_img(
     src_dir = pathlib.Path(src_path)
     dest_dir = get_dir_ready(dest_path)
 
-    output_extension = ".jpg"
+    output_extension = ".webp"
 
     for num, obj in enumerate(src_dir.glob("*")):
         if obj.suffix in acceptable_exts:        ### Test all extensions!
@@ -28,7 +28,7 @@ def get_cropped_img(
             width, height = img.size
             if width == height:
                 processed_img = img.resize((1000, 1000), resample=1)
-                processed_img.save(dest_dir/new_filename, quality=60)
+                processed_img.save(dest_dir/new_filename, quality=80)
             elif height == 3000 and width == 4000:
                 processed_img = img.crop((610, 105, 3390, 2885))
                 processed_img = processed_img.resize((1000, 1000), resample=1)
