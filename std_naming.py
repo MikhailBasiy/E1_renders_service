@@ -124,9 +124,9 @@ def normalize_filename(
     
     
 if __name__ == "__main__":
-    default_series = "Экспресс"
+    default_series = "Оптим"
     default_wardrobe_type = ""
-    default_front_type = ""
+    default_front_type = "1 секция"
     default_case_clr = ""
     default_profile_clr = "Серебро профиль"
 
@@ -140,10 +140,10 @@ if __name__ == "__main__":
 
     ic(default_values)
 
-    DEST_DIR = "Картинки_стандарт_имена"
-    ERROR_DIR = "Картинки_нераспозн_имена"
+    DEST_DIR = "images/Картинки_стандарт_имена"
+    ERROR_DIR = "images/Картинки_нераспозн_имена"
 
-    src_dir = Path("Исходные_картинки")
+    src_dir = Path("images/Исходные_картинки")
     imgs_lst = []
     for obj in src_dir.rglob("*"):
         if obj.is_file() and obj.suffix in acceptable_exts:
