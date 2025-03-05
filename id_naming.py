@@ -5,23 +5,24 @@ import pandas as pd
 import re
 
 from functions_lib import get_dir_ready
+from imgs_settings import acceptable_exts
 
 from icecream import ic        
 
 
-def parse_item_names(items_filename: str) -> pd.DataFrame:
-
-
+def parse_item_names(items_filename: str) -> pd.DataFrame: 
+    '''
+    парсинг Серии, Типа шкафа и Типа фасада 
+    ''' 
     def parse_name(item_name: str) -> tuple[str]:
-        pattern = "^([А-Яа-я\s]+) ((?:2х |2-|2-х |3х |3-х |3-)дверный) \(([\w\s,/]+)\)"
+        pattern = "^([А-Яа-я\s]+) ((?:2х |2-|2-х |3х |3-х |3-)дверный) \(([\w\s,/-]+)\)"
         try:
             series, wardrobe_type, front_type = re.search(pattern, item_name).groups()
         except AttributeError as e:
             ic(e, item_name)
         else:
-            return series, wardrobe_type, front_type  
-        
-             
+            return series, wardrobe_type, front_type
+
     items_ids = pd.read_excel(items_filename)
     items_ids.rename(columns={
         "Внешний код": "Внешний_код",
@@ -38,9 +39,9 @@ def parse_item_names(items_filename: str) -> pd.DataFrame:
 def parse_img_names(src_dir: pathlib.Path) -> pd.DataFrame:
     parsed_data: list[str] = []
     for object in src_dir.rglob("*"):
-        if object.is_file() and object.suffix in (".jpg", ".jpeg", ".webp"):
+        if object.is_file() and object.suffix in acceptable_exts:
             pattern = "^(Локер|Оптим|Широкий Прайм|Прайм|Экспресс|Эста) " \
-                      "(\d-х дверный) \(([\w\s,]*)\) ([\w\s ]+) " \
+                      "(\d-х дверный) \(([\w\s,-]*)\) ([\w\s ]+) " \
                       "([А-Яа-я]+ профиль)$"
             series, wardrobe_type, front_type, case_clr, profile_clr = (
                 re.search(pattern, object.stem, re.I)
@@ -82,6 +83,9 @@ def rename(
         on=["Серия", "Тип_шкафа", "Тип_фасада", "Цвет_корпуса", "Цвет_профиля"]
     )
 
+    merged_df.to_excel("check_table.xlsx", engine="xlsxwriter")
+
+
     for row in merged_df.dropna(how="any").itertuples():
         filename = row.Название_рендера + row.Расширение
         new_filename = row.Внешний_код + row.Расширение
@@ -91,9 +95,9 @@ def rename(
 
 
 if __name__ == "__main__":
-    SOURCE_DIR = "checked_files"
-    DEST_DIR = "processed_files"
-    ERROR_DIR = "unprocessed_files"
+    SOURCE_DIR = "images/Картинки_стандарт_имена"
+    DEST_DIR = "images/Картинки_ID_имена"
+    ERROR_DIR = "images/Картинки_ID_имена_ОШИБКА"
 
     filename = "outer_ids.xlsx"
 
