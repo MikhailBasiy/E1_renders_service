@@ -5,8 +5,8 @@ import shutil
 from functions_lib import get_dir_ready
 from parsing_settings import series_pattern, wardrobe_type_pattern, \
                              case_color_pattern, profile_clr_pattern, \
-                             front_type_pattern, wardrobe_type_matchings, \
-                             color_matchings, front_types_matchings, \
+                             color_matchings, wardrobe_type_matchings, \
+                             front_materials_pattern, front_materials_matchings, \
                              skip_words
 from imgs_settings import acceptable_exts
 
@@ -58,14 +58,14 @@ def normalize_filename(
         if any(word in filename for word in skip_words):
             continue
         file_ext = obj.suffix
-        ### Серия
+        ### Серия                       TODO: check that
         if default_series:  
             series = default_series
         else:
             series = re.search(
                 series_pattern, filename, re.I
             ).group(1).capitalize()
-        ### Тип
+        ### Тип шкафа                   TODO: check that
         if default_wardrobe_type:
             wardrobe_type = default_wardrobe_type 
         else:
@@ -92,7 +92,7 @@ def normalize_filename(
                 color_matchings,
                 err_dir
             )
-        ### Цвет профиля
+        ### Цвет профиля                TODO: fix that
         if default_profile_clr:
             profile_clr = default_profile_clr
         else:
@@ -105,20 +105,31 @@ def normalize_filename(
         filename = re.sub(f"{profile_clr}", "", filename)
 
         filename = re.sub(" +", " ", filename).strip()
-        ### Тип фасада
+        ### Тип фасада (1 секция, БМММБ и пр.)
         front_type = default_values.get("front_type", None)
         if not front_type:
             front_type = search_property(
                 obj,
                 filename,
                 front_type_pattern,
-                front_types_matchings,
+                front_type_matchings,
+                err_dir
+            )
+
+        ### Материалы фасада (ЛДСП, Зеркало, Волны, Матовое стекло и пр.)
+        front_materials = default_values.get("front_materials", None)
+        if not front_materials:
+            front_materials = search_property(
+                obj,
+                filename,
+                front_materials_pattern,
+                front_materials_matchings,
                 err_dir
             )
         ### Сохранение картинки с новым названием
         if all([series, wardrobe_type, front_type, case_clr, profile_clr]):
-            new_filename = f"{series} {wardrobe_type} "\
-                f"({front_type}) {case_clr} {profile_clr}{file_ext}"
+            new_filename = f"{series} {wardrobe_type} {front_type} "\
+                f"({front_materials}) {case_clr} {profile_clr}{file_ext}"
             shutil.copy(obj, dest_dir/new_filename)
     return
     
@@ -127,6 +138,7 @@ if __name__ == "__main__":
     default_series = "Оптим"
     default_wardrobe_type = ""
     default_front_type = "1 секция"
+    default_front_materials = ""
     default_case_clr = ""
     default_profile_clr = "Серебро профиль"
 
@@ -134,6 +146,7 @@ if __name__ == "__main__":
         "series": default_series,
         "wardrobe_type": default_wardrobe_type,
         "front_type": default_front_type,
+        "front_materials": default_front_materials,
         "case_clr": default_case_clr,
         "profile_clr": default_profile_clr
     }
