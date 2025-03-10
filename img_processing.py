@@ -28,7 +28,7 @@ def get_cropped_img(
             width, height = img.size
             if width == height:
                 processed_img = img.resize((1000, 1000), resample=1)
-                processed_img.save(dest_dir/new_filename, quality=80)
+                processed_img.save(dest_dir/new_filename, quality=85)
             elif height == 3000 and width == 4000:
                 processed_img = img.crop((610, 105, 3390, 2885))
                 processed_img = processed_img.resize((1000, 1000), resample=1)

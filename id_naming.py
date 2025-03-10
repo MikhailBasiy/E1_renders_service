@@ -15,13 +15,14 @@ def parse_item_names(items_filename: str) -> pd.DataFrame:
     парсинг Серии, Типа шкафа и Типа фасада 
     ''' 
     def parse_name(item_name: str) -> tuple[str]:
-        pattern = "^([А-Яа-я\s]+) ((?:2х |2-|2-х |3х |3-х |3-)дверный) \(([\w\s,/-]+)\)"
+        pattern = "^([А-Яа-я\s]+) ((?:2х |2-|2-х |3х |3-х |3-)дверный) ([^-,.()]*) \(([\w\s,/-]+)\)"
         try:
-            series, wardrobe_type, front_type = re.search(pattern, item_name).groups()
+            series, wardrobe_type, front_type, front_materials = re.search(pattern, item_name).groups()
         except AttributeError as e:
             ic(e, item_name)
         else:
-            return series, wardrobe_type, front_type
+            print(series, wardrobe_type, front_type, front_materials)
+            return series, wardrobe_type, front_type, front_materials
 
     items_ids = pd.read_excel(items_filename)
     items_ids.rename(columns={
@@ -31,7 +32,7 @@ def parse_item_names(items_filename: str) -> pd.DataFrame:
         },
         inplace=True
     )
-    items_ids["Серия"], items_ids["Тип_шкафа"], items_ids["Тип_фасада"] = \
+    items_ids["Серия"], items_ids["Тип_шкафа"], items_ids["Тип_фасада"], items_ids["Материалы_фасада"] = \
         zip(*items_ids["Название"].apply(parse_name))
     return items_ids
 
@@ -41,13 +42,15 @@ def parse_img_names(src_dir: pathlib.Path) -> pd.DataFrame:
     for object in src_dir.rglob("*"):
         if object.is_file() and object.suffix in acceptable_exts:
             pattern = "^(Локер|Оптим|Широкий Прайм|Прайм|Экспресс|Эста) " \
-                      "(\d-х дверный) \(([\w\s,-]*)\) ([\w\s ]+) " \
+                      "(\d-х дверный) ([^(]*) \(([\w\s,-]*)\) ([\w\s ]+) " \
                       "([А-Яа-я]+ профиль)$"
-            series, wardrobe_type, front_type, case_clr, profile_clr = (
+            series, wardrobe_type, front_type, front_materials, case_clr, profile_clr = (
                 re.search(pattern, object.stem, re.I)
             ).groups()
+            # print(object.stem)
+            # print(series, wardrobe_type, front_type, front_materials, case_clr, profile_clr)
             parsed_data.append(
-                [series, wardrobe_type, front_type, case_clr, profile_clr, object.stem, object.suffix]
+                [series, wardrobe_type, front_type, front_materials, case_clr, profile_clr, object.stem, object.suffix]
             )
     result = pd.DataFrame(
         parsed_data,
@@ -55,6 +58,7 @@ def parse_img_names(src_dir: pathlib.Path) -> pd.DataFrame:
             "Серия",
             "Тип_шкафа",
             "Тип_фасада",
+            "Материалы_фасада",
             "Цвет_корпуса",
             "Цвет_профиля",
             "Название_рендера",
@@ -80,7 +84,7 @@ def rename(
     merged_df = parsed_product_names.merge(
         parsed_img_names,
         how="left",
-        on=["Серия", "Тип_шкафа", "Тип_фасада", "Цвет_корпуса", "Цвет_профиля"]
+        on=["Серия", "Тип_шкафа", "Тип_фасада", "Материалы_фасада", "Цвет_корпуса", "Цвет_профиля"]
     )
 
     merged_df.to_excel("check_table.xlsx", engine="xlsxwriter")
