@@ -39,5 +39,5 @@ def get_cropped_img(
 if __name__ == "__main__":
     get_cropped_img(
         src_path = "images/Картинки_стандарт_имена",
-        dest_path = "images/Картинки для выгрузки"
+        dest_path = "images/Картинки_для_id"
     )

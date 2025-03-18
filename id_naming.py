@@ -7,7 +7,9 @@ import re
 from functions_lib import get_dir_ready
 from imgs_settings import acceptable_exts
 
-from icecream import ic        
+from icecream import ic  
+
+ic.configureOutput(includeContext=True)
 
 
 def parse_item_names(items_filename: str) -> pd.DataFrame: 
@@ -15,11 +17,13 @@ def parse_item_names(items_filename: str) -> pd.DataFrame:
     парсинг Серии, Типа шкафа и Типа фасада 
     ''' 
     def parse_name(item_name: str) -> tuple[str]:
-        pattern = "^([А-Яа-я\s]+) ((?:2х |2-|2-х |3х |3-х |3-)дверный) ([^-,.()]*) \(([\w\s,/-]+)\)"
+        pattern = r"^([А-Яа-я\s]+) ((?:2х |2-|2-х |3х |3-х |3-)дверный) ([^(]*) \(([а-яА-Я, ]*)\) \((?:[^()]+)\)"
         try:
             series, wardrobe_type, front_type, front_materials = re.search(pattern, item_name).groups()
         except AttributeError as e:
             ic(e, item_name)
+            ic(re.search(pattern, item_name))
+            print()
         else:
             print(series, wardrobe_type, front_type, front_materials)
             return series, wardrobe_type, front_type, front_materials
@@ -41,9 +45,9 @@ def parse_img_names(src_dir: pathlib.Path) -> pd.DataFrame:
     parsed_data: list[str] = []
     for object in src_dir.rglob("*"):
         if object.is_file() and object.suffix in acceptable_exts:
-            pattern = "^(Локер|Оптим|Широкий Прайм|Прайм|Экспресс|Эста) " \
-                      "(\d-х дверный) ([^(]*) \(([\w\s,-]*)\) ([\w\s ]+) " \
-                      "([А-Яа-я]+ профиль)$"
+            pattern = r"^(Локер|Оптим|Широкий Прайм|Прайм|Экспресс|Эста) " \
+                      r"(\d-х дверный) ([^(]*) \(([\w\s,-]*)\) ([\w\s ]+) " \
+                      r"([А-Яа-я]+ профиль)$"
             series, wardrobe_type, front_type, front_materials, case_clr, profile_clr = (
                 re.search(pattern, object.stem, re.I)
             ).groups()
@@ -64,6 +68,7 @@ def parse_img_names(src_dir: pathlib.Path) -> pd.DataFrame:
             "Название_рендера",
             "Расширение"],
     )
+    result.to_excel("parsed_imgs.xlsx")
     return result
 
 
@@ -99,8 +104,8 @@ def rename(
 
 
 if __name__ == "__main__":
-    SOURCE_DIR = "images/Картинки_стандарт_имена"
-    DEST_DIR = "images/Картинки_ID_имена"
+    SOURCE_DIR = "images/Картинки_для_id"
+    DEST_DIR = "images/Готовые к выгрузке"
     ERROR_DIR = "images/Картинки_ID_имена_ОШИБКА"
 
     filename = "outer_ids.xlsx"
